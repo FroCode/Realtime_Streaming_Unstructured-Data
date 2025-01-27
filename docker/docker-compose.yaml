@@ -16,7 +16,7 @@ services:
     networks:
       - spark-network
     volumes:
-        - ./jobs:/opt/bitnami/spark/jobs:rw
+        - ./jobs:/opt/bitnami/spark/:rw
     command: /opt/bitnami/spark/bin/spark-class org.apache.spark.deploy.master.Master
   spark-worker-1:
     image: bitnami/spark:latest
