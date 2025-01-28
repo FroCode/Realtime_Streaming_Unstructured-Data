@@ -7,7 +7,7 @@ offsets
 sources
 commits
 _spark_metadata
-
+config
 .idea
 terraform/.terraform.lock.hcl
 terraform/terraform.tfstate
