@@ -1,4 +1,0 @@
-configuration = {
-    'AWS_ACCESS_KEY': 'AKIA5FTZAGZESCTGF3UL',
-    'AWS_SECRET_KEY': '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'
-}
