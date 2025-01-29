@@ -22,3 +22,4 @@ __pycache__/udf_utils.cpython-312.pyc
 terraform.tfstate
 terraform/terraform_outputs.json
 jobs.py
+terraform/var.tf

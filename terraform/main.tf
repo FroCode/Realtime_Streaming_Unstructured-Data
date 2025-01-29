@@ -101,7 +101,7 @@ resource "aws_s3_bucket_policy" "spark_streaming_policy" {
           "s3:PutBucketPublicAccessBlock"
         ],
         "Principal": {
-          "AWS": "arn:aws:iam::905418126921:user/Admin"  # Update with your IAM user or role ARN
+          "AWS": [var.aws_arn]  # Update with your IAM user or role ARN
         },
         "Resource": "arn:aws:s3:::my-spark-streaming-fr01"
       }
