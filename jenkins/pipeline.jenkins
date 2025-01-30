@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY')  
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_KEY')  
         GITHUB_TOKEN = credentials('github-token')
     }
 
@@ -22,73 +20,15 @@ pipeline {
                 }
             }
         }
-        
-        stage('Fix Repository Issues') {
-            steps {
-                script {
-                    // Fix duplicate repository entries in sources.list
-                    sh '''
-                    sudo sed -i '/^deb.*hashicorp/d' /etc/apt/sources.list.d/*
-                    sudo sed -i '/^deb.*kubernetes/d' /etc/apt/sources.list.d/*
-                    
-                    # Re-add HashiCorp repository correctly
-                    echo "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-                    sudo apt-get update
-                    '''
-                }
-            }
-        }
-
-        stage('Install Terraform') {
-            steps {
-                script {
-                    // Automatically agree to remove the existing terraform package and install the new one
-                    sh '''
-                    sudo apt-get remove -y terraform
-                    sudo apt-get update
-                    curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-                    sudo apt-get update
-                    sudo apt-get install terraform
-                    '''
-                }
-            }
-        }
-        
-        stage('Initialize Terraform') {
-            steps {
-                script {
-                    // Initialize Terraform
-                    sh '''
-                    cd Realtime_Streaming_Unstructured-Data/terraform
-                    terraform init
-                    '''
-                }
-            }
-        }
-        
-        stage('Apply Terraform') {
-            steps {
-                script {
-                    // Apply Terraform configuration
-                    sh '''
-                    cd Realtime_Streaming_Unstructured-Data/terraform
-                    terraform destroy -auto-approve
-                    terraform plan
-                    terraform apply -auto-approve
-                    terraform output -json > terraform_output.json
-                    '''
-                }
-            }
-        }
 
         stage('Build Spark Job Docker Image') {
             steps {
                 script {
-                    // Build the Docker image for the Spark job
+                    // Copy requirements.txt to the Docker directory
                     sh '''
-                    cp requirements.txt Realtime_Streaming_Unstructured-Data/docker
+                    cp Realtime_Streaming_Unstructured-Data/requirements.txt Realtime_Streaming_Unstructured-Data/docker/
                     cd Realtime_Streaming_Unstructured-Data/docker
-                    sudo docker build -t spark-job -f DockerFile .
+                    sudo docker build -t spark-job -f Dockerfile .
                     '''
                 }
             }
@@ -106,12 +46,12 @@ pipeline {
             }
         }
 
-        stage('Copy Output to Spark Input') {
+        stage('Copy Input Files') {
             steps {
                 script {
-                    // Copy the Terraform output JSON to the Spark input directory
+                    // Copy any necessary input files to the Spark input directory
                     sh '''
-                    sudo docker cp Realtime_Streaming_Unstructured-Data/terraform/terraform_output.json spark-master:/opt/bitnami/spark/input/
+                    sudo docker cp Realtime_Streaming_Unstructured-Data/input/input_file.txt spark-master:/opt/bitnami/spark/input/
                     '''
                 }
             }
@@ -125,6 +65,18 @@ pipeline {
                     sudo docker exec spark-job spark-submit --master spark://spark-master:7077 /opt/bitnami/spark/jobs/main.py
                     '''
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Optionally stop and remove containers after the build
+            script {
+                sh '''
+                cd Realtime_Streaming_Unstructured-Data/docker
+                sudo docker-compose down
+                '''
             }
         }
     }
