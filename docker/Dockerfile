@@ -1,7 +1,7 @@
 FROM bitnami/spark:latest
 
 # Install additional dependencies (e.g., Python libraries)
-COPY ../requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
