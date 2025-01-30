@@ -103,7 +103,7 @@ resource "aws_s3_bucket_policy" "spark_streaming_policy" {
         "Principal": {
           "AWS": [var.aws_arn]  # Update with your IAM user or role ARN
         },
-        "Resource": "arn:aws:s3:::my-spark-streaming-fr01"
+        "Resource": "arn:aws:s3:::${aws_s3_bucket.spark_streaming_bucket.bucket}"
       }
     ]
   })
