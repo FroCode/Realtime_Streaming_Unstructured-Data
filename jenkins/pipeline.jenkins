@@ -72,7 +72,56 @@ pipeline {
                     // Apply Terraform configuration
                     sh '''
                     cd Realtime_Streaming_Unstructured-Data/terraform
+                    terraform destroy -auto-approve
+                    terraform plan
                     terraform apply -auto-approve
+                    terraform output -json > terraform_output.json
+                    '''
+                }
+            }
+        }
+
+        stage('Build Spark Job Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image for the Spark job
+                    sh '''
+                    cd Realtime_Streaming_Unstructured-Data/docker
+                    sudo docker build -t spark-job -f DockerFIle .
+                    '''
+                }
+            }
+        }
+
+        stage('Start Spark Containers') {
+            steps {
+                script {
+                    // Start the Spark master and worker containers using Docker Compose
+                    sh '''
+                    cd Realtime_Streaming_Unstructured-Data/docker
+                    sudo docker-compose up -d
+                    '''
+                }
+            }
+        }
+
+        stage('Copy Output to Spark Input') {
+            steps {
+                script {
+                    // Copy the Terraform output JSON to the Spark input directory
+                    sh '''
+                    sudo docker cp Realtime_Streaming_Unstructured-Data/terraform/terraform_output.json spark-master:/opt/bitnami/spark/input/
+                    '''
+                }
+            }
+        }
+
+        stage('Submit Spark Job') {
+            steps {
+                script {
+                    // Submit the Spark job
+                    sh '''
+                    sudo docker exec spark-job spark-submit --master spark://spark-master:7077 /opt/bitnami/spark/jobs/main.py
                     '''
                 }
             }
