@@ -86,6 +86,7 @@ pipeline {
                 script {
                     // Build the Docker image for the Spark job
                     sh '''
+                    cp requirements.txt Realtime_Streaming_Unstructured-Data/docker
                     cd Realtime_Streaming_Unstructured-Data/docker
                     sudo docker build -t spark-job -f DockerFIle .
                     '''
