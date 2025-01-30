@@ -24,9 +24,10 @@ pipeline {
         stage('Build Spark Job Docker Image') {
             steps {
                 script {
-                    // Copy requirements.txt to the Docker directory
+                    // Copy necessary files into the Docker directory
                     sh '''
                     cp Realtime_Streaming_Unstructured-Data/requirements.txt Realtime_Streaming_Unstructured-Data/docker/
+                    cp -r Realtime_Streaming_Unstructured-Data/input Realtime_Streaming_Unstructured-Data/docker/
                     cd Realtime_Streaming_Unstructured-Data/docker
                     sudo docker build -t spark-job -f Dockerfile .
                     '''
@@ -49,8 +50,9 @@ pipeline {
         stage('Copy Input Files') {
             steps {
                 script {
-                    // Copy any necessary input files to the Spark input directory
+                    // Ensure Spark master is running before copying files
                     sh '''
+                    until sudo docker ps | grep -q spark-master; do sleep 5; done
                     sudo docker cp Realtime_Streaming_Unstructured-Data/input/input_file.txt spark-master:/opt/bitnami/spark/input/
                     '''
                 }
@@ -62,7 +64,7 @@ pipeline {
                 script {
                     // Submit the Spark job
                     sh '''
-                    sudo docker exec spark-job spark-submit --master spark://spark-master:7077 /opt/bitnami/spark/jobs/main.py
+                    sudo docker exec spark-master spark-submit --master spark://spark-master:7077 /opt/bitnami/spark/jobs/main.py
                     '''
                 }
             }
@@ -71,7 +73,6 @@ pipeline {
 
     post {
         always {
-            // Optionally stop and remove containers after the build
             script {
                 sh '''
                 cd Realtime_Streaming_Unstructured-Data/docker
