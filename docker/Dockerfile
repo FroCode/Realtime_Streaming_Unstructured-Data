@@ -16,10 +16,10 @@ COPY requirements.txt .
 # Install required Python packages
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy Spark job scripts
+# Copy Spark job scripts from the jobs folder
 COPY jobs /opt/bitnami/spark/jobs/
 
-# Copy input files
+# Copy input files from the input folder
 COPY input /opt/bitnami/spark/input/
 
 # Ensure correct permissions
