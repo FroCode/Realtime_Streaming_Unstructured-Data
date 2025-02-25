@@ -29,3 +29,6 @@ terraform/.terraform/providers/registry.terraform.io/hashicorp/random/3.6.3/linu
 terraform/.terraform/providers/registry.terraform.io/hashicorp/random/3.6.3/linux_amd64/LICENSE.txt
 jobs/__pycache__/udf_utils.cpython-312.pyc
 jobs/__pycache__/config.cpython-312.pyc
+
+notes.bash
+/py.py

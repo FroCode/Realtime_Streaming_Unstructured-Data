@@ -28,7 +28,7 @@ services:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
       - SPARK_WORKER_CORES=2
-      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_MEMORY=2G
     depends_on:
       - spark-master
     networks:
@@ -41,8 +41,8 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_CORES=2
-      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2 # upgrade needed , check logs and KPI
+      - SPARK_WORKER_MEMORY=2G # upgrade needed , check logs and KPI
     depends_on:
       - spark-master
     networks:
@@ -77,6 +77,14 @@ services:
     networks:
       - spark-network
     command: spark-submit --master spark://spark-master:7077 /opt/bitnami/spark/jobs/main.py
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: spark
+      POSTGRES_PASSWORD: spark
+      POSTGRES_DB: sparkdb
+    networks:
+      - spark-network
 
 networks:
   spark-network:
